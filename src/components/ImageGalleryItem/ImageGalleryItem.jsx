@@ -1,8 +1,13 @@
 import React from 'react';
 import ModalImage from 'react-modal-image';
 import PropTypes from 'prop-types';
+import noImage from '../../no_img.jpg';
 
-export const ImageGalleryItem = ({ webformatURL, tags, largeImageURL }) => {
+export const ImageGalleryItem = ({
+  webformatURL = noImage,
+  tags = 'No info',
+  largeImageURL = noImage,
+}) => {
   return (
     <li className="gallery-item">
       <ModalImage

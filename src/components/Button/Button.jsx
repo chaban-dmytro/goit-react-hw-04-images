@@ -2,10 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Button } from '@mui/material';
 
-export const Btn = ({ state, loadMore }) => {
+export const Btn = ({ currentPage, totalPages, loadMore }) => {
   return (
     <>
-      {state.currentPage < state.totalPages && (
+      {currentPage < totalPages && (
         <Button variant="contained" id="load-more-btn" onClick={loadMore}>
           Load more
         </Button>
@@ -15,7 +15,8 @@ export const Btn = ({ state, loadMore }) => {
 };
 
 Btn.propTypes = {
-  state: PropTypes.object,
+  currentPage: PropTypes.number,
+  totalPages: PropTypes.number,
   loadMore: PropTypes.func,
 };
 

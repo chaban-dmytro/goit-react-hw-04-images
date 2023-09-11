@@ -1,113 +1,109 @@
-import React, { Component } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
 import Btn from 'components/Button/Button';
-import PropTypes from 'prop-types';
 import Loader from 'components/Loader/Loader';
 
 import { fetchImages } from 'api';
 import { Alert } from '@mui/material';
+import { Context } from 'components/App';
 
 const imagesOnPage = 12;
 
-export class ImageGallery extends Component {
-  state = {
-    data: null,
-    currentPage: 1,
-    totalPages: 1,
-    status: 'idle',
-  };
+const ImageGallery = () => {
+  const [data, setData] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [status, setStatus] = useState('idle');
 
-  async componentDidUpdate(prevProps, prevState) {
-    if (prevProps.name !== this.props.name) {
-      this.setState({ currentPage: 1, status: 'pending' });
+  const context = useContext(Context);
+
+  useEffect(() => {
+    async function fetchData() {
+      setCurrentPage(1);
       try {
         const images = await fetchImages(
-          this.props.name,
-          this.state.currentPage,
+          context.name,
+          currentPage,
           imagesOnPage
         );
-        this.setState({ data: images.data });
-        this.setState({
-          totalPages: Math.ceil(images.data.totalHits / imagesOnPage),
-        });
-        this.setState({ status: 'resolved' });
+        setData(images.data);
+        setTotalPages(Math.ceil(images.data.totalHits / imagesOnPage));
+        setStatus('resolved');
       } catch (error) {
-        this.setState({ status: 'rejected' });
+        setStatus('rejected');
         console.log(error);
       }
     }
+    if (context.name) {
+      fetchData();
+    }
+    // eslint-disable-next-line
+  }, [context.name]);
 
-    if (prevState.currentPage < this.state.currentPage) {
+  useEffect(() => {
+    async function fetchMoreImages() {
       try {
         const images = await fetchImages(
-          this.props.name,
-          this.state.currentPage,
+          context.name,
+          currentPage,
           imagesOnPage
         );
-        this.setState(prevState => {
-          const newData = { ...prevState.data };
-          newData.hits = [...prevState.data.hits, ...images.data.hits];
-          return {
-            data: newData,
-          };
+        setData(prevState => {
+          const newData = { ...prevState };
+          newData.hits = [...prevState.hits, ...images.data.hits];
+          return newData;
         });
-        this.setState({ status: 'resolved' });
+        setStatus('resolved');
       } catch (error) {
-        this.setState({ status: 'rejected' });
+        setStatus('rejected');
         console.log(error);
       }
     }
+    if (currentPage > 1) {
+      fetchMoreImages();
+    }
+    // eslint-disable-next-line
+  }, [currentPage]);
+
+  function handleLoadMore(event) {
+    setCurrentPage(currentPage + 1);
   }
 
-  handleLoadMore = event => {
-    this.setState(({ currentPage }) => {
-      return {
-        currentPage: currentPage + 1,
-      };
-    });
-  };
-
-  render() {
-    return (
-      <>
-        {this.state.status === 'idle' ? null : (
-          <>
-            <ul className="gallery">
-              {this.state.status === 'pending' && <Loader />}
-              {this.state.status === 'rejected' && (
-                <Alert severity="error">Error! Reload page</Alert>
-              )}
-              {this.state.status === 'resolved' &&
-                (this.state.data.hits.length === 0 ? (
-                  <Alert severity="error">There are no images!</Alert>
-                ) : (
-                  this.state.data.hits.map(
-                    ({ webformatURL, id, tags, largeImageURL }) => (
-                      <ImageGalleryItem
-                        key={id}
-                        webformatURL={webformatURL}
-                        tags={tags}
-                        largeImageURL={largeImageURL}
-                        status={this.state.status}
-                      ></ImageGalleryItem>
-                    )
-                  )
-                ))}
-            </ul>
+  return (
+    <>
+      {status === 'idle' ? null : (
+        <>
+          <ul className="gallery">
+            {status === 'pending' && <Loader />}
+            {status === 'rejected' && (
+              <Alert severity="error">Error! Reload page</Alert>
+            )}
+            {status === 'resolved' &&
+              (data.hits.length === 0 ? (
+                <Alert severity="error">There are no images!</Alert>
+              ) : (
+                data.hits.map(({ webformatURL, id, tags, largeImageURL }) => (
+                  <ImageGalleryItem
+                    key={id}
+                    webformatURL={webformatURL}
+                    tags={tags}
+                    largeImageURL={largeImageURL}
+                    status={status}
+                  ></ImageGalleryItem>
+                ))
+              ))}
+          </ul>
+          {
             <Btn
-              state={this.state}
-              loadMore={this.handleLoadMore}
-              imagesOnPage={imagesOnPage}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              loadMore={handleLoadMore}
             ></Btn>
-          </>
-        )}
-      </>
-    );
-  }
-}
-
-ImageGallery.propTypes = {
-  name: PropTypes.string,
+          }
+        </>
+      )}
+    </>
+  );
 };
 
 export default ImageGallery;

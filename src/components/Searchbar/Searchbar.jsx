@@ -1,53 +1,47 @@
-import React, { Component } from 'react';
+import { useContext, useState } from 'react';
 import { TextField, Button } from '@mui/material';
-import PropTypes from 'prop-types';
+import { Context } from 'components/App';
 
-export class Searchbar extends Component {
-  state = {
-    name: '',
-  };
+export const Searchbar = () => {
+  const [name, setName] = useState('');
 
-  handleFormChange = event => {
-    this.setState({ name: event.currentTarget.value });
-  };
+  const context = useContext(Context);
 
-  handleFormSubmit = event => {
+  function handleFormChange(event) {
+    setName(event.currentTarget.value);
+  }
+
+  function handleFormSubmit(event) {
     event.preventDefault();
-    if (this.state.name.trim() === '') {
+    if (name.trim() === '') {
       alert('Enter name!');
       return;
     }
-    this.props.submitForm(this.state.name);
-    this.setState({ name: '' });
-  };
-
-  render() {
-    return (
-      <header className="searchbar">
-        <form className="form" onSubmit={this.handleFormSubmit}>
-          <Button variant="contained" type="submit" className="button">
-            <span className="button-label">Search</span>
-          </Button>
-          <TextField
-            id="outlined-basic"
-            label="Search images and photos"
-            variant="outlined"
-            value={this.state.name}
-            className="input"
-            type="text"
-            autoComplete="off"
-            autoFocus
-            placeholder="Search images and photos"
-            onChange={this.handleFormChange}
-          />
-        </form>
-      </header>
-    );
+    context.set(name);
+    setName('');
   }
-}
 
-Searchbar.propTypes = {
-  submitForm: PropTypes.func,
+  return (
+    <header className="searchbar">
+      <form className="form" onSubmit={handleFormSubmit}>
+        <Button variant="contained" type="submit" className="button">
+          <span className="button-label">Search</span>
+        </Button>
+        <TextField
+          id="outlined-basic"
+          label="Search images and photos"
+          variant="outlined"
+          value={name}
+          className="input"
+          type="text"
+          autoComplete="off"
+          autoFocus
+          placeholder="Search images and photos"
+          onChange={handleFormChange}
+        />
+      </form>
+    </header>
+  );
 };
 
 export default Searchbar;

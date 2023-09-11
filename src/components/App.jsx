@@ -1,24 +1,20 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
 
-export class App extends Component {
-  state = {
-    name: '',
-  };
+export const Context = React.createContext();
 
-  handleFormSubmit = searchValue => {
-    this.setState({ name: searchValue });
-  };
+export const App = () => {
+  const [name, setName] = useState('');
 
-  render() {
-    return (
-      <>
-        <Searchbar submitForm={this.handleFormSubmit}></Searchbar>
-        <ImageGallery name={this.state.name}></ImageGallery>
-      </>
-    );
-  }
-}
+  return (
+    <>
+      <Context.Provider value={{ name: name, set: setName }}>
+        <Searchbar></Searchbar>
+        <ImageGallery></ImageGallery>
+      </Context.Provider>
+    </>
+  );
+};
 
 export default App;
