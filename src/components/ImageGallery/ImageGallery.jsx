@@ -18,8 +18,19 @@ const ImageGallery = () => {
   const context = useContext(Context);
 
   useEffect(() => {
-    async function fetchData() {
+    if (context.name) {
+      console.log(context.name);
       setCurrentPage(1);
+      fetchData();
+    }
+
+    if (currentPage > 1) {
+      fetchMoreImages();
+    }
+
+    async function fetchData() {
+      console.log('Download');
+      console.log(currentPage);
       try {
         const images = await fetchImages(
           context.name,
@@ -34,14 +45,10 @@ const ImageGallery = () => {
         console.log(error);
       }
     }
-    if (context.name) {
-      fetchData();
-    }
-    // eslint-disable-next-line
-  }, [context.name]);
 
-  useEffect(() => {
     async function fetchMoreImages() {
+      console.log('Load more');
+      console.log(currentPage);
       try {
         const images = await fetchImages(
           context.name,
@@ -59,11 +66,34 @@ const ImageGallery = () => {
         console.log(error);
       }
     }
-    if (currentPage > 1) {
-      fetchMoreImages();
-    }
-    // eslint-disable-next-line
-  }, [currentPage]);
+  }, [context.name, currentPage]);
+
+  // useEffect(() => {
+  //   async function fetchMoreImages() {
+  //     console.log('Load more');
+  //     console.log(currentPage);
+  //     try {
+  //       const images = await fetchImages(
+  //         context.name,
+  //         currentPage,
+  //         imagesOnPage
+  //       );
+  //       setData(prevState => {
+  //         const newData = { ...prevState };
+  //         newData.hits = [...prevState.hits, ...images.data.hits];
+  //         return newData;
+  //       });
+  //       setStatus('resolved');
+  //     } catch (error) {
+  //       setStatus('rejected');
+  //       console.log(error);
+  //     }
+  //   }
+  //   if (currentPage > 1) {
+  //     fetchMoreImages();
+  //   }
+  //   // eslint-disable-next-line
+  // }, [currentPage]);
 
   function handleLoadMore(event) {
     setCurrentPage(currentPage + 1);
