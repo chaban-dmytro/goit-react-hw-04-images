@@ -11,7 +11,7 @@ const imagesOnPage = 12;
 
 const ImageGallery = () => {
   const [data, setData] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  // const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [status, setStatus] = useState('idle');
 
@@ -19,22 +19,16 @@ const ImageGallery = () => {
 
   useEffect(() => {
     if (context.name) {
-      console.log(context.name);
-      setCurrentPage(1);
       fetchData();
-    }
-
-    if (currentPage > 1) {
-      fetchMoreImages();
     }
 
     async function fetchData() {
       console.log('Download');
-      console.log(currentPage);
+      console.log(context.currentPage);
       try {
         const images = await fetchImages(
           context.name,
-          currentPage,
+          context.currentPage,
           imagesOnPage
         );
         setData(images.data);
@@ -45,14 +39,20 @@ const ImageGallery = () => {
         console.log(error);
       }
     }
+    // eslint-disable-next-line
+  }, [context.name]);
 
+  useEffect(() => {
+    if (context.currentPage > 1) {
+      fetchMoreImages();
+    }
     async function fetchMoreImages() {
       console.log('Load more');
-      console.log(currentPage);
+      console.log(context.currentPage);
       try {
         const images = await fetchImages(
           context.name,
-          currentPage,
+          context.currentPage,
           imagesOnPage
         );
         setData(prevState => {
@@ -66,37 +66,11 @@ const ImageGallery = () => {
         console.log(error);
       }
     }
-  }, [context.name, currentPage]);
-
-  // useEffect(() => {
-  //   async function fetchMoreImages() {
-  //     console.log('Load more');
-  //     console.log(currentPage);
-  //     try {
-  //       const images = await fetchImages(
-  //         context.name,
-  //         currentPage,
-  //         imagesOnPage
-  //       );
-  //       setData(prevState => {
-  //         const newData = { ...prevState };
-  //         newData.hits = [...prevState.hits, ...images.data.hits];
-  //         return newData;
-  //       });
-  //       setStatus('resolved');
-  //     } catch (error) {
-  //       setStatus('rejected');
-  //       console.log(error);
-  //     }
-  //   }
-  //   if (currentPage > 1) {
-  //     fetchMoreImages();
-  //   }
-  //   // eslint-disable-next-line
-  // }, [currentPage]);
+    // eslint-disable-next-line
+  }, [context.currentPage]);
 
   function handleLoadMore(event) {
-    setCurrentPage(currentPage + 1);
+    context.setCurrentPage(context.currentPage + 1);
   }
 
   return (
@@ -125,7 +99,7 @@ const ImageGallery = () => {
           </ul>
           {
             <Btn
-              currentPage={currentPage}
+              currentPage={context.currentPage}
               totalPages={totalPages}
               loadMore={handleLoadMore}
             ></Btn>

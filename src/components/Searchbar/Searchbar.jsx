@@ -18,6 +18,7 @@ export const Searchbar = () => {
       return;
     }
     context.set(name);
+    context.setCurrentPage(1);
     setName('');
   }
 
